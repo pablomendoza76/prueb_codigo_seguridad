@@ -1,0 +1,13 @@
+{
+  "name": "backend-cursos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend local con Express y SQLite para la demo de inyección SQL",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "5.3.0"
+  }
+}

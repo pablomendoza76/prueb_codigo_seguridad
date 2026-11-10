@@ -1,0 +1,82 @@
+<main class="wrap">
+  <header class="intro">
+    <h1>Inyección SQL por concatenación</h1>
+    <p>Frontend en Angular, backend local en Node.js con Express y base de datos SQLite.</p>
+  </header>
+
+  <section class="browser" aria-label="Página web simulada">
+    <div class="bar">
+      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <div class="url">http://localhost:4200/cursos?nombre=<b>{{ urlNombre() }}</b></div>
+    </div>
+
+    <div class="page">
+      <div class="site-head">
+        <strong>Portal Académico</strong>
+        <span>Búsqueda de cursos</span>
+      </div>
+
+      <div class="mode" role="radiogroup" aria-label="Versión de la consulta en el backend">
+        <button type="button" role="radio" data-mode="vulnerable"
+                [attr.aria-checked]="modo() === 'vulnerable'" (click)="cambiarModo('vulnerable')">
+          Vulnerable (concatenación)
+        </button>
+        <button type="button" role="radio" data-mode="seguro"
+                [attr.aria-checked]="modo() === 'seguro'" (click)="cambiarModo('seguro')">
+          Segura (parametrizada)
+        </button>
+      </div>
+
+      <form (submit)="buscar($event)" autocomplete="off">
+        <label for="q">Nombre del curso</label>
+        <div class="search">
+          <input id="q" spellcheck="false" placeholder="Ej.: Bases de Datos"
+                 [value]="nombre()" (input)="onInput($event)">
+          <button type="submit" [disabled]="cargando()">Buscar</button>
+        </div>
+      </form>
+
+      <div class="presets">
+        Probar:
+        @for (ejemplo of ejemplos; track ejemplo) {
+          <button type="button" (click)="usarEjemplo(ejemplo)">{{ ejemplo }}</button>
+        }
+      </div>
+
+      @if (mensaje(); as m) {
+        <div class="status" aria-live="polite"
+             [class.bad]="m.tipo === 'malo'" [class.good]="m.tipo === 'bueno'">
+          {{ m.texto }}
+        </div>
+      }
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>id</th><th>nombre</th></tr>
+          </thead>
+          <tbody>
+            @for (curso of cursos(); track curso.id) {
+              <tr><td>{{ curso.id }}</td><td>{{ curso.nombre }}</td></tr>
+            } @empty {
+              <tr><td colspan="2" class="empty">{{ sqlEjecutado() ? 'Sin resultados.' : 'Escribe un nombre y pulsa Buscar.' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  @if (sqlEjecutado()) {
+    <h2>Consulta que ejecutó el backend en SQLite</h2>
+    <pre class="code">{{ partesSql().antes }}@if (partesSql().usuario) {<mark>{{ partesSql().usuario }}</mark>}{{ partesSql().medio }}@if (partesSql().usuario2) {<mark>{{ partesSql().usuario2 }}</mark>}{{ partesSql().despues }}@for (p of parametros(); track $index) {
+<span class="c">-- parámetro {{ $index + 1 }} (texto): </span><mark>{{ p }}</mark>}</pre>
+    <p class="note">
+      @if (modo() === 'vulnerable') {
+        El texto del usuario se pega dentro de la instrucción SQL. Si trae una comilla, puede cerrar la cadena y agregar condiciones propias.
+      } @else {
+        La consulta se prepara primero con el marcador ?. El texto del usuario viaja aparte como dato, así que nunca se interpreta como SQL.
+      }
+    </p>
+  }
+</main>
